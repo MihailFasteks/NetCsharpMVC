@@ -1,10 +1,67 @@
-﻿<div style="padding-top:30px">
-    <h3>Список фильмов</h3>
-    <table class="table">
-        <tr><td><p>Name</p></td><td><p>Director</p></td><td><p>Genr</p></td><td><p>Year</p></td><td><p>Poster</p></td><td><p>Description</p></td></tr>
-        @foreach (var f in ViewBag.Films)
+﻿@model IEnumerable<NetCsharpMVC.Models.Film>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Director)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Genr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Year)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Poster)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
         {
-                <tr><td><p>@f.Name</p></td><td><p>@f.Director</p></td><td><p>@f.Genr</p></td><td><p>@f.Year</p></td><td><p>@f.Poster</p></td><td><p>@f.Description</p></td></tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Director)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Genr)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Year)
+                </td>
+                 <td>
+                    @Html.DisplayFor(modelItem => item.Poster)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
         }
-    </table>
-</div>
+    </tbody>
+</table>
