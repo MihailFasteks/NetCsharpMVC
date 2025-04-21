@@ -1,15 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetCsharpMVC.Models;
+using System.IO;
 
 namespace NetCsharpMVC.Controllers
 {
     public class FilmController : Controller
     {
        private readonly FilmContext db;
-        public FilmController(FilmContext context)
+        IWebHostEnvironment _appEnvironment;
+        public FilmController(FilmContext context, IWebHostEnvironment appEnvironment)
         {
             db = context;
+            _appEnvironment = appEnvironment;
         }
         //public async Task<IActionResult> Index()
         //{
@@ -50,10 +53,23 @@ namespace NetCsharpMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Surname,Age,GPA")] Film film)
+        public async Task<IActionResult> Create([Bind("Id,Name,Director,Genr,Year, Description")] Film film, IFormFile posterFile)
         {
             if (ModelState.IsValid)
             {
+                if(posterFile!=null)
+                {
+                    string fileName=Path.GetFileName(posterFile.FileName);
+                    string uploadPath = Path.Combine(_appEnvironment.WebRootPath, "Files");
+                    string filePath = Path.Combine(uploadPath, fileName);
+
+                    
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await posterFile.CopyToAsync(stream);
+                    }
+                    film.Poster = "/Files/" + fileName;
+                }
                 db.Add(film);
                 await db.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -82,7 +98,7 @@ namespace NetCsharpMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Surname,Age,GPA")] Film film)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Director,Genr,Year, Description")] Film film, IFormFile posterFile)
         {
             if (id != film.Id)
             {
@@ -93,6 +109,34 @@ namespace NetCsharpMVC.Controllers
             {
                 try
                 {
+                    var existingFilm = await db.Films.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id);
+                    if (existingFilm == null)
+                    {
+                        return NotFound();
+                    }
+                    if (posterFile != null)
+                    {
+                        string fileName = Path.GetFileName(posterFile.FileName);
+                        string uploadPath = Path.Combine(_appEnvironment.WebRootPath, "Files");
+
+                        if (!Directory.Exists(uploadPath))
+                            Directory.CreateDirectory(uploadPath);
+
+                        string filePath = Path.Combine(uploadPath, fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await posterFile.CopyToAsync(stream);
+                        }
+
+                        film.Poster = "/Files/" + fileName;
+                    }
+                    else
+                    {
+                        
+                        film.Poster = existingFilm.Poster;
+                    }
+
                     db.Update(film);
                     await db.SaveChangesAsync();
                 }
@@ -149,5 +193,6 @@ namespace NetCsharpMVC.Controllers
         {
             return db.Films.Any(e => e.Id == id);
         }
+      
     }
 }

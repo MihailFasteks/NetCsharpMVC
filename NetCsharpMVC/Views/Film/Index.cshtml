@@ -51,7 +51,7 @@
                     @Html.DisplayFor(modelItem => item.Year)
                 </td>
                  <td>
-                    @Html.DisplayFor(modelItem => item.Poster)
+                    <img src="@Url.Content(item.Poster)" style="max-width:250px">
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Description)
